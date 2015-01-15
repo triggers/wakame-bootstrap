@@ -341,7 +341,7 @@ do_register_network()
 	set -e
 	/opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage network add \
 						  --uuid nw-demo1 \
-						  --ipv4-network 10.0.2.0 \
+						  --ipv4-network 10.0.2.15 \
 						  --prefix 24 \
 						  --ipv4-gw 10.0.2.2 \
 						  --dns 8.8.8.8 \
