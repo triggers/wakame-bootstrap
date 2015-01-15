@@ -103,9 +103,9 @@ cat > /etc/sysconfig/network-scripts/ifcfg-eth0 <<EOF2
     NM_CONTROLLED=no
 EOF2
 
-sleep 15
 echo "Will reset networking after 15 seconds"
 echo "Press ^C to cancel."
+sleep 15
 EOF
 	chmod +x /tmp/setup-bridge.sh
 	return 255
