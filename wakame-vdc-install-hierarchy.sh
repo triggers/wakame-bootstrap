@@ -516,7 +516,7 @@ wakame_jobs=(
 check_start_wakame_vdc()
 {
     for j in "${wakame_jobs[@]}"; do
-	[[ "$(status $j 2>/dev/null)" == *stop* ]] && return 255
+	[[ "$(status $j 2>/dev/null)" == *running* ]] || return 255
     done
     return 0
 }
