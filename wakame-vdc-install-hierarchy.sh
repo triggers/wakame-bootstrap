@@ -55,6 +55,61 @@ do_block()
     false
 }
 
+######## lets_get_started
+
+deps_lets_get_started='
+   yum_repository_setup
+   install_dcmgr
+'
+check_lets_get_started()
+{
+    [ -f /tmp/did_lets_get_started ]
+}
+
+do_lets_get_started()
+{
+    # just a wrapper to call the deps
+    touch /tmp/did_lets_get_started
+}
+
+######## yum_repository_setup
+
+deps_yum_repository_setup='
+'
+
+check_yum_repository_setup()
+{
+    [ -f /etc/yum.repos.d/wakame-vdc.repo ] && \
+	[ -f /etc/yum.repos.d/openvz.repo ] && \
+	[ -f /tmp/installed_epel_release ]
+}
+
+do_yum_repository_setup()
+{
+    curl -o /etc/yum.repos.d/wakame-vdc.repo -R https://raw.githubusercontent.com/axsh/wakame-vdc/master/rpmbuild/wakame-vdc.repo
+
+    curl -o /etc/yum.repos.d/openvz.repo -R https://raw.githubusercontent.com/axsh/wakame-vdc/master/rpmbuild/openvz.repo
+
+    yum install -y epel-release && touch /tmp/installed_epel_release
+}
+
+
+######## install_dcmgr
+deps_install_dcmgr='
+'
+
+check_install_dcmgr()
+{
+    [ -f /tmp/installed_dcmgr ]
+}
+
+do_install_dcmgr()
+{
+    yum install -y wakame-vdc-dcmgr-vmapp-config && \
+	touch /tmp/installed_dcmgr
+}
+
+
 # {do/check/do1/check1/reset1} {list of steps....} -- params
 main()
 {
