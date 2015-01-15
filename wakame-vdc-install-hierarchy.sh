@@ -27,6 +27,7 @@ default_steps='
 deps_all_steps='
    lets_get_started
    configuration
+   start_wakame_vdc
 '
 
 check_all_steps()
@@ -383,6 +384,53 @@ do_configure_gui()
 	/opt/axsh/wakame-vdc/ruby/bin/rake db:init
     )
     touch /tmp/configure_gui
+}
+
+######## start_required_services
+
+deps_start_required_services='
+'
+
+check_start_required_services()
+{
+    {
+	service rabbitmq-server status || return
+	service mysqld start || return
+    } >/dev/null
+}
+
+do_start_required_services()
+{
+    service rabbitmq-server start
+    service mysqld start
+}
+
+######## start_wakame_vdc
+
+deps_start_wakame_vdc='
+   start_required_services
+'
+
+wakame_jobs=(
+    vdc-dcmgr
+    vdc-collector
+    vdc-hva
+    vdc-webui
+)
+
+check_start_wakame_vdc()
+{
+    for j in "${wakame_jobs[@]}"; do
+	[[ "$(status $j)" == *stop* ]] && return 255
+    done
+    return 0
+}
+
+do_start_wakame_vdc()
+{
+    for j in "${wakame_jobs[@]}"; do
+	start $j
+    done
 }
 
 
