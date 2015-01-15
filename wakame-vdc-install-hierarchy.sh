@@ -691,7 +691,9 @@ do1_cmd()
     try cd "$abspath"
     local stepname="$1"
     local indent="$2"
-    echo -n "$indent$stepname   "
+    printf "*%-10s %s   " "${indent//  --  /*}" "$indent$stepname"
+    #echo -n "$indent$stepname   "
+    echo
     if "do_$stepname"
     then
 	if "check_$stepname"
