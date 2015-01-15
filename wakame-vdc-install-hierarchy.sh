@@ -82,8 +82,9 @@ deps_yum_repository_setup='
 
 check_yum_repository_setup()
 {
+    #[ -f /etc/yum.repos.d/openvz.repo ] && \
+    
     [ -f /etc/yum.repos.d/wakame-vdc.repo ] && \
-	[ -f /etc/yum.repos.d/openvz.repo ] && \
 	[ -f /tmp/installed_epel_release ] && \
 	[ -f /etc/yum.repos.d/epel.repo ] && \
 	[ -f /etc/yum.repos.d/epel-testing.repo ]
@@ -93,7 +94,7 @@ do_yum_repository_setup()
 {
     curl -o /etc/yum.repos.d/wakame-vdc.repo -R https://raw.githubusercontent.com/axsh/wakame-vdc/master/rpmbuild/wakame-vdc.repo
 
-    curl -o /etc/yum.repos.d/openvz.repo -R https://raw.githubusercontent.com/axsh/wakame-vdc/master/rpmbuild/openvz.repo
+    #    curl -o /etc/yum.repos.d/openvz.repo -R https://raw.githubusercontent.com/axsh/wakame-vdc/master/rpmbuild/openvz.repo
 
     #    yum install -y epel-release && touch /tmp/installed_epel_release
 
@@ -140,7 +141,7 @@ check_install_hva()
 
 do_install_hva()
 {
-    yum install -y wakame-vdc-hva-openvz-vmapp-config && touch /tmp/installed_hva
+    yum install -y wakame-vdc-hva-kvm-vmapp-config && touch /tmp/installed_hva
 }
 
 
