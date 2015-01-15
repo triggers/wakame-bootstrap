@@ -382,6 +382,10 @@ do_configure_gui()
 	mysqladmin -uroot create wakame_dcmgr_gui
 	cd /opt/axsh/wakame-vdc/frontend/dcmgr_gui/
 	/opt/axsh/wakame-vdc/ruby/bin/rake db:init
+
+	/opt/axsh/wakame-vdc/frontend/dcmgr_gui/bin/gui-manage account add --name default --uuid a-shpoolxx
+	/opt/axsh/wakame-vdc/frontend/dcmgr_gui/bin/gui-manage user add --name "demo user" --uuid u-demo --password demo --login-id demo
+	/opt/axsh/wakame-vdc/frontend/dcmgr_gui/bin/gui-manage user associate u-demo --account-ids a-shpoolxx
     )
     touch /tmp/configure_gui
 }
