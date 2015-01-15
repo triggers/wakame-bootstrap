@@ -61,6 +61,8 @@ do_block()
 deps_lets_get_started='
    yum_repository_setup
    install_dcmgr
+   install_hva
+   install_webui
 '
 check_lets_get_started()
 {
@@ -111,6 +113,7 @@ do_yum_repository_setup()
 
 
 ######## install_dcmgr
+
 deps_install_dcmgr='
 '
 
@@ -125,6 +128,40 @@ do_install_dcmgr()
 	touch /tmp/installed_dcmgr
 }
 
+######## install_hva
+
+deps_install_hva='
+'
+
+check_install_hva()
+{
+    [ -f /tmp/installed_hva ]
+}
+
+do_install_hva()
+{
+    yum install -y wakame-vdc-hva-openvz-vmapp-config && touch /tmp/installed_hva
+}
+
+
+######## install_webui
+
+deps_install_webui='
+'
+
+check_install_webui()
+{
+    [ -f /tmp/installed_webui ]
+}
+
+do_install_webui()
+{
+    yum install -y wakame-vdc-webui-vmapp-config && touch /tmp/installed_webui
+}
+
+
+
+######################### dispatching code ################################
 
 # {do/check/do1/check1/reset1} {list of steps....} -- params
 main()
