@@ -25,6 +25,7 @@ default_steps='
 # tree/DAGs of steps in this file.
 
 deps_all_steps='
+   lets_get_started
 '
 
 check_all_steps()
