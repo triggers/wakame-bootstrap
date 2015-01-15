@@ -166,6 +166,7 @@ do_install_webui()
 deps_configuration='
    service_configs
    create_vdc_database
+   register_hva
 '
 
 check_configuration()
@@ -231,6 +232,40 @@ do_create_vdc_database()
     touch /tmp/created_vdc_database
 }
 
+######## register_hva
+
+
+deps_register_hva='
+'
+
+check_register_hva()
+{
+    [ -f /tmp/did_register_hva ]
+}
+
+do_register_hva()
+{
+    uncomment 'NODE_ID=demo1' '/etc/default/vdc-hva' || return
+    
+    /opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage host add hva.demo1 \
+       --uuid hn-demo1 \
+       --display-name "demo HVA 1" \
+       --cpu-cores 100 \
+       --memory-size 10240 \
+       --hypervisor kvm \
+       --arch x86_64 \
+       --disk-space 102400 \
+       --force || return
+    
+    touch /tmp/did_register_hva
+}
+
+function uncomment() {
+  local commented_line=$1
+  local files=$2
+
+  sudo sed -i -e "s/^#\\(${commented_line}\\)/\\1/" ${files}
+}
 
 ######################### dispatching code ################################
 
