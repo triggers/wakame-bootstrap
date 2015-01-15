@@ -489,7 +489,7 @@ check_start_required_services()
     {
 	service rabbitmq-server status || return
 	service mysqld start || return
-    } >/dev/null
+    } 2>/dev/null >&2
 }
 
 do_start_required_services()
