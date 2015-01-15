@@ -524,6 +524,12 @@ do_start_wakame_vdc()
     done
 }
 
+reset_start_wakame_vdc()
+{
+    for j in "${wakame_jobs[@]}"; do
+	stop $j
+    done
+}
 
 ######################### dispatching code ################################
 
