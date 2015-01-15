@@ -144,7 +144,6 @@ get_ip_mask()
 ######## lets_get_started
 
 deps_lets_get_started='
-   confirm_bridge_already_setup
    install_dcmgr
    install_hva
    install_webui
@@ -479,7 +478,6 @@ do_configure_gui()
 ######## start_required_services
 
 deps_start_required_services='
-   configuration
 '
 
 check_start_required_services()
@@ -499,6 +497,8 @@ do_start_required_services()
 ######## start_wakame_vdc
 
 deps_start_wakame_vdc='
+   confirm_bridge_already_setup
+   configuration
    start_required_services
 '
 
