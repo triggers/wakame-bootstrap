@@ -87,7 +87,6 @@ check_yum_repository_setup()
     #[ -f /etc/yum.repos.d/openvz.repo ] && \
     
     [ -f /etc/yum.repos.d/wakame-vdc.repo ] && \
-	[ -f /tmp/installed_epel_release ] && \
 	[ -f /etc/yum.repos.d/epel.repo ] && \
 	[ -f /etc/yum.repos.d/epel-testing.repo ]
 }
@@ -165,6 +164,7 @@ do_install_webui()
 ######## configuration
 
 deps_configuration='
+   lets_get_started
    service_configs
    create_vdc_database
    register_hva
@@ -389,6 +389,7 @@ do_configure_gui()
 ######## start_required_services
 
 deps_start_required_services='
+   configuration
 '
 
 check_start_required_services()
@@ -421,7 +422,7 @@ wakame_jobs=(
 check_start_wakame_vdc()
 {
     for j in "${wakame_jobs[@]}"; do
-	[[ "$(status $j)" == *stop* ]] && return 255
+	[[ "$(status $j 2>/dev/null)" == *stop* ]] && return 255
     done
     return 0
 }
