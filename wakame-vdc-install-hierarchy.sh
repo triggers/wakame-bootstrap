@@ -167,6 +167,8 @@ deps_configuration='
    service_configs
    create_vdc_database
    register_hva
+   register_image
+   register_network
 '
 
 check_configuration()
@@ -266,6 +268,100 @@ function uncomment() {
 
   sudo sed -i -e "s/^#\\(${commented_line}\\)/\\1/" ${files}
 }
+
+######## download_image
+
+deps_download_image='
+'
+
+check_download_image()
+{
+    [ -f /var/lib/wakame-vdc/images/ubuntu-lucid-kvm-md-32.raw.gz ]
+}
+
+do_download_image()
+{
+    sudo mkdir -p /var/lib/wakame-vdc/images
+    (
+	cd /var/lib/wakame-vdc/images
+	sudo curl -O http://dlc.wakame.axsh.jp.s3.amazonaws.com/demo/vmimage/ubuntu-lucid-kvm-md-32.raw.gz
+    )
+}
+
+
+######## register_image
+
+deps_register_image='
+   download_image
+'
+
+check_register_image()
+{
+    [ -f /tmp/register_image ]
+}
+
+do_register_image()
+{
+    /opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage backupstorage add \
+      --uuid bkst-local \
+      --display-name "local storage" \
+      --base-uri "file:///var/lib/wakame-vdc/images/" \
+      --storage-type local \
+      --description "storage on the local filesystem" || return
+
+    /opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage backupobject add \
+      --uuid bo-lucid5d \
+      --display-name "Ubuntu 10.04 (Lucid Lynx) root partition" \
+      --storage-id bkst-local \
+      --object-key ubuntu-lucid-kvm-md-32.raw.gz \
+      --size 149084 \
+      --allocation-size 359940 \
+      --container-format gz \
+      --checksum 1f841b195e0fdfd4342709f77325ce29 || return
+
+    touch /tmp/register_image
+}
+
+
+######## register_network
+
+deps_register_network='
+'
+
+check_register_network()
+{
+    [ -f /tmp/register_network ]
+}
+
+do_register_network()
+{
+    (
+	set -e
+	/opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage network add \
+						  --uuid nw-demo1 \
+						  --ipv4-network 10.0.2.0 \
+						  --prefix 24 \
+						  --ipv4-gw 10.0.2.2 \
+						  --dns 8.8.8.8 \
+						  --account-id a-shpoolxx \
+						  --display-name "demo network"
+
+	/opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage network dhcp addrange nw-demo1 10.0.2.100 10.0.2.150
+
+	# /opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage network reserve nw-demo1 --ipv4 192.168.3.100
+
+	/opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage macrange add 525400 1 ffffff --uuid mr-demomacs
+
+	/opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage network dc add public --uuid dcn-public --description "the network instances are started in"
+
+	/opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage network dc add-network-mode public securitygroup
+
+	/opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage network forward nw-demo1 public
+    )
+    touch /tmp/register_network
+    # TODO: worry about other IP ranges and eth1 vs eth0, etc.
+}
+
 
 ######################### dispatching code ################################
 
