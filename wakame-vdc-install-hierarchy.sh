@@ -417,6 +417,12 @@ do_register_image()
       --container-format gz \
       --checksum 1f841b195e0fdfd4342709f77325ce29 || return
 
+    /opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage image add local bo-lucid5d \
+      --account-id a-shpoolxx \
+      --uuid wmi-lucid5d \
+      --root-device uuid:148bc5df-3fc5-4e93-8a16-7328907cb1c0 \
+      --display-name "Ubuntu 10.04 (Lucid Lynx)"
+
     touch /tmp/register_image
 }
 
