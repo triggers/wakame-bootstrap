@@ -25,8 +25,6 @@ default_steps='
 # tree/DAGs of steps in this file.
 
 deps_all_steps='
-   lets_get_started
-   configuration
    start_wakame_vdc
 '
 
@@ -117,6 +115,7 @@ do_yum_repository_setup()
 ######## install_dcmgr
 
 deps_install_dcmgr='
+   yum_repository_setup
 '
 
 check_install_dcmgr()
@@ -133,6 +132,7 @@ do_install_dcmgr()
 ######## install_hva
 
 deps_install_hva='
+   yum_repository_setup
 '
 
 check_install_hva()
@@ -149,6 +149,7 @@ do_install_hva()
 ######## install_webui
 
 deps_install_webui='
+   yum_repository_setup
 '
 
 check_install_webui()
