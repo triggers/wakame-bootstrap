@@ -26,6 +26,7 @@ default_steps='
 
 deps_all_steps='
    lets_get_started
+   configuration
 '
 
 check_all_steps()
@@ -160,6 +161,75 @@ do_install_webui()
     yum install -y wakame-vdc-webui-vmapp-config && touch /tmp/installed_webui
 }
 
+######## configuration
+
+deps_configuration='
+   service_configs
+   create_vdc_database
+'
+
+check_configuration()
+{
+    [ -f /tmp/did_configuration ]
+}
+
+do_configuration()
+{
+    touch /tmp/did_configuration
+}
+
+
+######## service_configs
+
+deps_service_configs='
+'
+
+service_config_files=(
+    /opt/axsh/wakame-vdc/dcmgr/config/dcmgr.conf.example:/etc/wakame-vdc/dcmgr.conf
+
+    /opt/axsh/wakame-vdc/dcmgr/config/hva.conf.example:/etc/wakame-vdc/hva.conf
+
+    /opt/axsh/wakame-vdc/frontend/dcmgr_gui/config/database.yml.example:/etc/wakame-vdc/dcmgr_gui/database.yml
+
+    /opt/axsh/wakame-vdc/frontend/dcmgr_gui/config/dcmgr_gui.yml.example:/etc/wakame-vdc/dcmgr_gui/dcmgr_gui.yml
+
+    /opt/axsh/wakame-vdc/frontend/dcmgr_gui/config/instance_spec.yml.example:/etc/wakame-vdc/dcmgr_gui/instance_spec.yml
+
+    /opt/axsh/wakame-vdc/frontend/dcmgr_gui/config/load_balancer_spec.yml.example:/etc/wakame-vdc/dcmgr_gui/load_balancer_spec.yml
+)
+
+check_service_configs()
+{
+    for f in "${service_config_files[@]}" ; do
+	[ -f "${f#*:}" ] || return 255
+    done
+    return 0
+}
+
+do_service_configs()
+{
+    for f in "${service_config_files[@]}" ; do
+	cp "${f%:*}" "${f#*:}"
+    done
+}
+
+######## create_vdc_database
+
+deps_create_vdc_database='
+'
+
+check_create_vdc_database() {
+    [ -f /tmp/created_vdc_database ]
+}
+
+do_create_vdc_database()
+{
+    service mysqld start
+    mysqladmin -uroot create wakame_dcmgr
+    cd /opt/axsh/wakame-vdc/dcmgr
+    /opt/axsh/wakame-vdc/ruby/bin/rake db:up || return
+    touch /tmp/created_vdc_database
+}
 
 
 ######################### dispatching code ################################
