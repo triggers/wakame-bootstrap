@@ -82,7 +82,9 @@ check_yum_repository_setup()
 {
     [ -f /etc/yum.repos.d/wakame-vdc.repo ] && \
 	[ -f /etc/yum.repos.d/openvz.repo ] && \
-	[ -f /tmp/installed_epel_release ]
+	[ -f /tmp/installed_epel_release ] && \
+	[ -f /etc/yum.repos.d/epel.repo ] && \
+	[ -f /etc/yum.repos.d/epel-testing.repo ]
 }
 
 do_yum_repository_setup()
@@ -91,7 +93,20 @@ do_yum_repository_setup()
 
     curl -o /etc/yum.repos.d/openvz.repo -R https://raw.githubusercontent.com/axsh/wakame-vdc/master/rpmbuild/openvz.repo
 
-    yum install -y epel-release && touch /tmp/installed_epel_release
+    #    yum install -y epel-release && touch /tmp/installed_epel_release
+
+    # from https://github.com/wakameci/buildbook-rhel6/blob/master/epel-release/xexecscript.d/epel-release.sh
+    rpm -Uvh http://ftp.jaist.ac.jp/pub/Linux/Fedora/epel/6/i386/epel-release-6-8.noarch.rpm
+    # workaround 2014/10/17
+    #
+    # in order escape below error
+    # > Error: Cannot retrieve metalink for repository: epel. Please verify its path and try again
+    #
+    sed -i \
+	-e 's,^#baseurl,baseurl,' \
+	-e 's,^mirrorlist=,#mirrorlist=,' \
+	-e 's,http://download.fedoraproject.org/pub/epel/,http://ftp.jaist.ac.jp/pub/Linux/Fedora/epel/,' \
+	/etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel-testing.repo
 }
 
 
