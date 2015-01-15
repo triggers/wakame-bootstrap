@@ -169,6 +169,7 @@ deps_configuration='
    register_hva
    register_image
    register_network
+   configure_gui
 '
 
 check_configuration()
@@ -360,6 +361,28 @@ do_register_network()
     )
     touch /tmp/register_network
     # TODO: worry about other IP ranges and eth1 vs eth0, etc.
+}
+
+
+######## configure_gui
+
+deps_configure_gui='
+'
+
+check_configure_gui()
+{
+    [ -f /tmp/configure_gui ]
+}
+
+do_configure_gui()
+{
+    (
+	set -e
+	mysqladmin -uroot create wakame_dcmgr_gui
+	cd /opt/axsh/wakame-vdc/frontend/dcmgr_gui/
+	/opt/axsh/wakame-vdc/ruby/bin/rake db:init
+    )
+    touch /tmp/configure_gui
 }
 
 
