@@ -56,10 +56,87 @@ do_block()
     false
 }
 
+######## confirm_bridge_already_setup
+
+# the check_ part must be run
+
+deps_confirm_bridge_already_setup='
+'
+
+check_confirm_bridge_already_setup()
+{
+    get_default_route && get_ip_prefix "$INTERFACE"
+    (
+	set -e
+	which brctl >/dev/null
+	[ "$INTERFACE" = "br0" ]
+    ) || {
+	echo "This script requires the bridge to be set up first,"
+	echo "which should be done manually.  A script to do this"
+	echo "Has been prepared at /tmp/setup-bridge.sh, assuming"
+	echo "IP=$IPADDR, PREFIX=$PREFIX, GATEWAY=$GATEWAY and"
+	echo "that the outgoing interface is $INTERFACE.  Inspect"
+	echo "the script carefully for correctness before running."
+	cat >/tmp/setup-bridge.sh <<EOF
+cat > /etc/sysconfig/network-scripts/ifcfg-br0 <<EOF2
+    DEVICE=br0
+    TYPE=Bridge
+    BOOTPROTO=static
+    ONBOOT=yes
+    NM_CONTROLLED=no
+    IPADDR=$IPADDR
+    NETMASK=255.255.255.0
+    GATEWAY=$GATEWAY
+    DNS1=8.8.8.8
+    DELAY=0
+EOF2
+
+cat > /etc/sysconfig/network-scripts/ifcfg-eth0 <<EOF2
+    DEVICE="$INTERFACE"
+    ONBOOT="yes"
+    BRIDGE=br0
+    NM_CONTROLLED=no
+EOF2
+
+sleep 15
+echo "Will reset networking after 15 seconds"
+echo "Press ^C to cancel."
+EOF
+    } 1>&2
+}
+
+do_confirm_bridge_already_setup()
+{
+
+}
+
+get_default_route()
+{
+    while read iface dest gway rest; do
+	if [ "$dest" = "00000000" ]; then
+	    export INTERFACE="$iface"
+	    export GATEWAY="$gway"
+	    break
+	fi
+    done </proc/net/route
+    [ "$GATEWAY" = "" ] && return 255
+    GATEWAY="$({ read -n 2 dd; read -n 2 cc; read -n 2 bb; read -n 2 aa
+                 echo "$(( 0x$aa )).$(( 0x$bb )).$(( 0x$cc )).$(( 0x$dd ))"
+               } <<<"$GATEWAY" )"
+}
+
+get_ip_prefix()
+{
+    iface="$1"
+    cmdout="$(ip addr show "$iface")"
+    IFS=" /" read IPADDR PREFIX ignore <<<"${cmdout#*inet }"
+}
+
+
 ######## lets_get_started
 
 deps_lets_get_started='
-   yum_repository_setup
+   confirm_bridge_already_setup
    install_dcmgr
    install_hva
    install_webui
