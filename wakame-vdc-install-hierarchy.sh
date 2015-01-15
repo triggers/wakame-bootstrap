@@ -144,6 +144,13 @@ get_ip_mask()
     read MASK ignore <<<"${cmdout#*Mask:}"
 }
 
+get_ip_prefix()
+{
+    iface="$1"
+    cmdout="$(ip addr show "$iface")"
+    IFS=" /" read IPADDR PREFIX ignore <<<"${cmdout#*inet }"
+}
+
 
 ######## lets_get_started
 
@@ -428,16 +435,19 @@ do_register_network()
 {
     (
 	set -e
+	get_default_route
+	get_ip_prefix "$INTERFACE"
+	
 	/opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage network add \
 						  --uuid nw-demo1 \
-						  --ipv4-network 10.0.2.15 \
-						  --prefix 24 \
-						  --ipv4-gw 10.0.2.2 \
+						  --ipv4-network $IPADDR \
+						  --prefix $PREFIX \
+						  --ipv4-gw $GATEWAY \
 						  --dns 8.8.8.8 \
 						  --account-id a-shpoolxx \
 						  --display-name "demo network"
-
-	/opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage network dhcp addrange nw-demo1 10.0.2.100 10.0.2.150
+	guess_unused="${IPADDR%.*}.100  ${IPADDR%.*}.150"
+	/opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage network dhcp addrange nw-demo1 $guess_unused
 
 	# /opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage network reserve nw-demo1 --ipv4 192.168.3.100
 
@@ -450,7 +460,6 @@ do_register_network()
 	/opt/axsh/wakame-vdc/dcmgr/bin/vdc-manage network forward nw-demo1 public
     )
     touch /tmp/register_network
-    # TODO: worry about other IP ranges and eth1 vs eth0, etc.
 }
 
 
