@@ -27,7 +27,7 @@ First do this:
 
 And get a feel for how it is split up into separate steps and what the
 dependencies are between the steps.  Pick a step of interest and use
-search in your editor to find that second of the code, which by itself
+search in your editor to find that section of the code, which by itself
 should be short and easy to read.
 
 
