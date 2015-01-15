@@ -65,19 +65,24 @@ deps_confirm_bridge_already_setup='
 
 check_confirm_bridge_already_setup()
 {
-    get_default_route && get_ip_prefix "$INTERFACE"
+    get_default_route && get_ip_mask "$INTERFACE"
     (
 	set -e
 	which brctl >/dev/null
 	[ "$INTERFACE" = "br0" ]
     ) || {
+	echo
 	echo "This script requires the bridge to be set up first,"
 	echo "which should be done manually.  A script to do this"
-	echo "Has been prepared at /tmp/setup-bridge.sh, assuming"
-	echo "IP=$IPADDR, PREFIX=$PREFIX, GATEWAY=$GATEWAY and"
+	echo "has been prepared at /tmp/setup-bridge.sh, assuming"
+	echo "IP=$IPADDR, MASK=$MASK, GATEWAY=$GATEWAY and"
 	echo "that the outgoing interface is $INTERFACE.  Inspect"
 	echo "the script carefully for correctness before running."
 	cat >/tmp/setup-bridge.sh <<EOF
+set -x
+yum install -y bridge-utils
+which brctl || exit 255
+
 cat > /etc/sysconfig/network-scripts/ifcfg-br0 <<EOF2
     DEVICE=br0
     TYPE=Bridge
@@ -85,7 +90,7 @@ cat > /etc/sysconfig/network-scripts/ifcfg-br0 <<EOF2
     ONBOOT=yes
     NM_CONTROLLED=no
     IPADDR=$IPADDR
-    NETMASK=255.255.255.0
+    NETMASK=$MASK
     GATEWAY=$GATEWAY
     DNS1=8.8.8.8
     DELAY=0
@@ -102,12 +107,14 @@ sleep 15
 echo "Will reset networking after 15 seconds"
 echo "Press ^C to cancel."
 EOF
+	chmod +x /tmp/setup-bridge.sh
+	return 255
     } 1>&2
 }
 
 do_confirm_bridge_already_setup()
 {
-
+    :
 }
 
 get_default_route()
@@ -125,11 +132,12 @@ get_default_route()
                } <<<"$GATEWAY" )"
 }
 
-get_ip_prefix()
+get_ip_mask()
 {
     iface="$1"
-    cmdout="$(ip addr show "$iface")"
-    IFS=" /" read IPADDR PREFIX ignore <<<"${cmdout#*inet }"
+    cmdout="$(ifconfig "$iface")"
+    read IPADDR ignore <<<"${cmdout#*inet addr:}"
+    read MASK ignore <<<"${cmdout#*Mask:}"
 }
 
 
